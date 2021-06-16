@@ -88,7 +88,6 @@ namespace VL53L0X {
      * @param dat is the data will be write, eg: 5
      */
     //% blockId="WriteBuf" block="registor address %addr|write buf %dat"
-    //% weight=100 blockGap=8
     export function writeBuf(addr: number, dat: number[]): void {
         let buf = pins.createBuffer(dat.length + 2);
         buf[0] = addr >> 8;
@@ -105,7 +104,6 @@ namespace VL53L0X {
      * @param size read data count, eg: 16
      */
     //% blockId="ReadBuf" block="registor address %addr|read buf %size"
-    //% weight=100 blockGap=8
     export function readBuf(addr: number, size: number): number[] {
         let retbuf:number[]=[];
 
@@ -123,7 +121,6 @@ namespace VL53L0X {
      * @param addr i2c address, eg: 0x50
      */
     //% blockId="setI2cAddress" block="i2c address set to %addr"
-    //% weight=70 blockGap=8
     export function setI2cAddress(addr: number): void {
         I2C_ADDR = addr
     }

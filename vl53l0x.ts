@@ -1,12 +1,12 @@
 /**
- * makecode EEPROM Package.
+ * makecode VL53L0X Package.
  */
 
 /**
- * EEPROM block
+ * VL53L0X block
  */
-//% weight=100 color=#303030 icon="\uf2db" block="EEPROM"
-namespace EEPROM {
+//% weight=100 color=#303030 icon="\ue115" block="EEPROM"
+namespace VL53L0X {
     let EEPROM_ADDR = 0x50;
 
     /**

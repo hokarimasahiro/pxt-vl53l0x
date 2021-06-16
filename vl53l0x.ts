@@ -28,6 +28,7 @@ namespace VL53L0X {
      * @param addr registor address, eg: 0x80
      */
     //% blockId="ReadReg" block="read data from registor address %addr"
+    //% advanced=true
     export function readByte(addr: number): number {
         pins.i2cWriteNumber(I2C_ADDR, addr, NumberFormat.UInt8BE);
         return pins.i2cReadNumber(I2C_ADDR, NumberFormat.UInt8BE);
@@ -39,6 +40,7 @@ namespace VL53L0X {
      * @param dat is the data will be write, eg: 0x1234
      */
     //% blockId="WriteReg16" block="write registor address %addr|word %dat"
+    //% advanced=true
     export function writeREg16(addr: number, dat: number): void {
         let buf = pins.createBuffer(3);
         buf[0] = addr;
@@ -52,6 +54,7 @@ namespace VL53L0X {
      * @param addr registor address, eg: 0x80
      */
     //% blockId="ReadReg16" block="read word from registor address %addr"
+    //% advanced=true
     export function readWord(addr: number): number {
         pins.i2cWriteNumber(I2C_ADDR, addr, NumberFormat.UInt8BE);
         return pins.i2cReadNumber(I2C_ADDR, NumberFormat.UInt16BE);
@@ -63,6 +66,7 @@ namespace VL53L0X {
      * @param dat is the data will be write, eg: 0x12345678
      */
     //% blockId="WriteReg32" block="write registor address %addr|dword %dat"
+    //% advanced=true
     export function writeReg32(addr: number, dat: number): void {
         let buf = pins.createBuffer(5);
         buf[0] = addr;
@@ -78,6 +82,7 @@ namespace VL53L0X {
      * @param addr eeprom address, eg: 0x80
      */
     //% blockId="ReadReg32" block="read dword from registor address %addr"
+    //% advanced=true
     export function readREg32(addr: number): number {
         pins.i2cWriteNumber(I2C_ADDR, addr, NumberFormat.UInt8BE);
         return pins.i2cReadNumber(I2C_ADDR, NumberFormat.Int32BE);
@@ -89,6 +94,7 @@ namespace VL53L0X {
      * @param dat is the data will be write, eg: 5
      */
     //% blockId="WriteBuf" block="registor address %addr|write buf %dat"
+    //% advanced=true
     export function writeBuf(addr: number, dat: number[]): void {
         let buf = pins.createBuffer(dat.length + 2);
         buf[0] = addr >> 8;
@@ -105,6 +111,7 @@ namespace VL53L0X {
      * @param size read data count, eg: 16
      */
     //% blockId="ReadBuf" block="registor address %addr|read buf %size"
+    //% advanced=true
     export function readBuf(addr: number, size: number): number[] {
         let retbuf:number[]=[];
 
@@ -116,12 +123,12 @@ namespace VL53L0X {
         return retbuf;
     }
 
-
     /**
      * set i2c address
      * @param addr i2c address, eg: 0x50
      */
     //% blockId="setI2cAddress" block="i2c address set to %addr"
+    //% advanced=true
     export function setI2cAddress(addr: number): void {
         I2C_ADDR = addr
     }

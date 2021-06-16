@@ -61,7 +61,7 @@ namespace VL53L0X {
      * @param addr registor address, eg: 0x80
      * @param dat is the data will be write, eg: 0x12345678
      */
-    //% blockId="WriteReg32" block="registor address %addr|dword %dat"
+    //% blockId="WriteReg32" block="write registor address %addr|dword %dat"
     export function writeReg32(addr: number, dat: number): void {
         let buf = pins.createBuffer(5);
         buf[0] = addr;
@@ -83,11 +83,11 @@ namespace VL53L0X {
     }
 
     /**
-     * Write data to the specified address
-     * @param addr eeprom address, eg: 1
+     * Write data to the specified registor
+     * @param addr registor address, eg: 0x00
      * @param dat is the data will be write, eg: 5
      */
-    //% blockId="WriteBuf" block="eeprom address %addr|write buf %dat"
+    //% blockId="WriteBuf" block="registor address %addr|write buf %dat"
     //% weight=100 blockGap=8
     export function writeBuf(addr: number, dat: number[]): void {
         let buf = pins.createBuffer(dat.length + 2);
@@ -100,11 +100,11 @@ namespace VL53L0X {
     }
 
     /**
-     * Read data from the specified address
-     * @param addr eeprom address, eg: 1
+     * Read data from the specified registor
+     * @param addr registor address, eg: 0x00
      * @param size read data count, eg: 16
      */
-    //% blockId="ReadBuf" block="eeprom address %addr|read buf %size"
+    //% blockId="ReadBuf" block="registor address %addr|read buf %size"
     //% weight=100 blockGap=8
     export function readBuf(addr: number, size: number): number[] {
         let retbuf:number[]=[];

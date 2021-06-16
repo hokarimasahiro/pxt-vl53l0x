@@ -5,96 +5,81 @@
 /**
  * VL53L0X block
  */
-//% weight=100 color=#303030 icon="\ue115" block="EEPROM"
+//% weight=100 color=#303030 icon="\ue115" block="VL53L0X"
 namespace VL53L0X {
-    let EEPROM_ADDR = 0x50;
+    let I2C_ADDR = 0x29;
 
     /**
-     * Write byte data to the specified address
-     * @param addr eeprom address, eg: 1
-     * @param dat is the data will be write, eg: 5
+     * Write byte data to the specified registor
+     * @param addr registor address, eg: 0x80
+     * @param dat is the data will be write, eg: 0x05
      */
-    //% blockId="WriteByte" block="eeprom address %addr|write byte %dat"
-    //% weight=100 blockGap=8
-    export function writeByte(addr: number, dat: number): void {
-        let address = EEPROM_ADDR + (addr >> 16)
-        let buf = pins.createBuffer(3);
-        buf[0] = addr >> 8;
-        buf[1] = addr;
-        buf[2] = dat;
-        pins.i2cWriteBuffer(address, buf)
+    //% blockId="writeReg" block="write registor address %addr|byte %dat"
+    export function writeReg(addr: number, dat: number): void {
+        let buf = pins.createBuffer(2);
+        buf[0] = addr;
+        buf[1] = dat;
+        pins.i2cWriteBuffer(I2C_ADDR, buf)
     }
 
     /**
-     * Read byte data from the specified address
-     * @param addr eeprom address, eg: 1
+     * Read byte data from the specified registor
+     * @param addr registor address, eg: 0x80
      */
-    //% blockId="ReadByte" block="read byte from address %addr"
-    //% weight=99 blockGap=8
+    //% blockId="ReadReg" block="read data from registor address %addr"
     export function readByte(addr: number): number {
-        let address = EEPROM_ADDR + (addr >> 16)
-        pins.i2cWriteNumber(address, addr, NumberFormat.UInt16BE);
-        return pins.i2cReadNumber(address, NumberFormat.UInt8BE);
+        pins.i2cWriteNumber(I2C_ADDR, addr, NumberFormat.UInt8BE);
+        return pins.i2cReadNumber(I2C_ADDR, NumberFormat.UInt8BE);
     }
 
     /**
-     * Write word data to the specified address
-     * @param addr eeprom address, eg: 2
-     * @param dat is the data will be write, eg: 6
+     * Write word data to the specified registor
+     * @param addr eeprom address, eg: 0x80
+     * @param dat is the data will be write, eg: 0x1234
      */
-    //% blockId="WriteWord" block="eeprom address %addr|write word %dat"
-    //% weight=90 blockGap=8
-    export function writeWord(addr: number, dat: number): void {
-        let address = EEPROM_ADDR + (addr >> 16)
-        let buf = pins.createBuffer(4);
-        buf[0] = addr >> 8;
-        buf[1] = addr;
+    //% blockId="WriteReg16" block="write registor address %addr|word %dat"
+    export function writeREg16(addr: number, dat: number): void {
+        let buf = pins.createBuffer(3);
+        buf[0] = addr;
+        buf[1] = dat & 0xff;
         buf[2] = dat >> 8;
-        buf[3] = dat;
-        pins.i2cWriteBuffer(address, buf)
+        pins.i2cWriteBuffer(I2C_ADDR, buf)
     }
 
     /**
-     * Read word data from the specified address
-     * @param addr eeprom address, eg: 2
+     * Read word data from the specified registor
+     * @param addr registor address, eg: 0x80
      */
-    //% blockId="ReadWord" block="read word from address %addr"
-    //% weight=89 blockGap=8
+    //% blockId="ReadReg16" block="read word from registor address %addr"
     export function readWord(addr: number): number {
-        let address = EEPROM_ADDR + (addr >> 16)
-        pins.i2cWriteNumber(address, addr, NumberFormat.UInt16BE);
-        return pins.i2cReadNumber(address, NumberFormat.UInt16BE);
+        pins.i2cWriteNumber(I2C_ADDR, addr, NumberFormat.UInt8BE);
+        return pins.i2cReadNumber(I2C_ADDR, NumberFormat.UInt16BE);
     }
 
     /**
-     * Write double word data to the specified address
-     * @param addr eeprom address, eg: 4
-     * @param dat is the data will be write, eg: 7
+     * Write double word data to the specified registor
+     * @param addr registor address, eg: 0x80
+     * @param dat is the data will be write, eg: 0x12345678
      */
-    //% blockId="WriteDWord" block="eeprom address %addr|write dword %dat"
-    //% weight=80 blockGap=8
-    export function writeDword(addr: number, dat: number): void {
-        let address = EEPROM_ADDR + (addr >>> 16)
-        let buf = pins.createBuffer(6);
-        buf[0] = addr >> 8;
-        buf[1] = addr;
-        buf[2] = dat >> 24;
+    //% blockId="WriteReg32" block="registor address %addr|dword %dat"
+    export function writeReg32(addr: number, dat: number): void {
+        let buf = pins.createBuffer(5);
+        buf[0] = addr;
+        buf[1] = dat & 0xff;
+        buf[2] = dat >> 8;
         buf[3] = dat >> 16;
-        buf[4] = dat >> 8;
-        buf[5] = dat;
-        pins.i2cWriteBuffer(address, buf)
+        buf[4] = dat >> 24;
+        pins.i2cWriteBuffer(I2C_ADDR, buf)
     }
 
     /**
-     * Read double word data from the specified address
-     * @param addr eeprom address, eg: 4
+     * Read double word data from the specified registor
+     * @param addr eeprom address, eg: 0x80
      */
-    //% blockId="ReadDWord" block="read dword from address %addr"
-    //% weight=79 blockGap=8
-    export function readDword(addr: number): number {
-        let address = EEPROM_ADDR + (addr >>> 16)
-        pins.i2cWriteNumber(address, addr, NumberFormat.UInt16BE);
-        return pins.i2cReadNumber(address, NumberFormat.Int32BE);
+    //% blockId="ReadReg32" block="read dword from registor address %addr"
+    export function readREg32(addr: number): number {
+        pins.i2cWriteNumber(I2C_ADDR, addr, NumberFormat.UInt8BE);
+        return pins.i2cReadNumber(I2C_ADDR, NumberFormat.Int32BE);
     }
 
     /**
@@ -105,14 +90,13 @@ namespace VL53L0X {
     //% blockId="WriteBuf" block="eeprom address %addr|write buf %dat"
     //% weight=100 blockGap=8
     export function writeBuf(addr: number, dat: number[]): void {
-        let address = EEPROM_ADDR + (addr >> 16)
         let buf = pins.createBuffer(dat.length + 2);
         buf[0] = addr >> 8;
         buf[1] = addr;
         for(let i=0;i<dat.length;i++){
             buf[i + 2] = dat[i] & 0xff;
         }
-        pins.i2cWriteBuffer(address, buf)
+        pins.i2cWriteBuffer(I2C_ADDR, buf)
     }
 
     /**
@@ -123,11 +107,10 @@ namespace VL53L0X {
     //% blockId="ReadBuf" block="eeprom address %addr|read buf %size"
     //% weight=100 blockGap=8
     export function readBuf(addr: number, size: number): number[] {
-        let address = EEPROM_ADDR + (addr >> 16)
         let retbuf:number[]=[];
 
-        pins.i2cWriteNumber(address, addr, NumberFormat.UInt16BE);
-        let buf = pins.i2cReadBuffer(address, size);
+        pins.i2cWriteNumber(I2C_ADDR, addr, NumberFormat.UInt16BE);
+        let buf = pins.i2cReadBuffer(I2C_ADDR, size);
         for(let i=0;i<size;i++){
             retbuf.push(buf[i]);
         }
@@ -136,51 +119,12 @@ namespace VL53L0X {
 
 
     /**
-     * Write strings to the specified address
-     * @param addr eeprom address, eg: 1
-     * @param dat is the data will be write, eg: "abcd"
-     */
-    //% blockId="WriteStr" block="eeprom address %addr|write strings %dat"
-    //% weight=100 blockGap=8
-    export function writeStr(addr: number, dat: string): void {
-        let address = EEPROM_ADDR + (addr >> 16)
-        let buf = pins.createBuffer(dat.length + 3);
-        buf[0] = addr >> 8;
-        buf[1] = addr;
-        for(let i=0;i<dat.length;i++){
-            buf[i + 2] = dat.charCodeAt(i);
-        }
-        buf[dat.length + 2] = 0x00;
-        pins.i2cWriteBuffer(address, buf)
-    }
-
-    /**
-     * Read strings from the specified address
-     * @param addr eeprom address, eg: 1
-     * @param maxsize read data count max, eg: 1024
-     */
-    //% blockId="ReadStr" block="eeprom address %addr|read strings"
-    //% weight=100 blockGap=8
-    export function readStr(addr: number,maxsize:number): string {
-        let address = EEPROM_ADDR + (addr >> 16)
-        let retstr:string="";
-
-        pins.i2cWriteNumber(address, addr, NumberFormat.UInt16BE);
-        let buf = pins.i2cReadBuffer(address, maxsize);
-        for(let i=0;i<maxsize;i++){
-            if (buf[i]==0x00) break;
-            retstr = retstr + String.fromCharCode(buf[i]);
-        }
-        return retstr;
-    }
-
-    /**
      * set i2c address
      * @param addr i2c address, eg: 0x50
      */
     //% blockId="setI2cAddress" block="i2c address set to %addr"
     //% weight=70 blockGap=8
     export function setI2cAddress(addr: number): void {
-        EEPROM_ADDR = addr
+        I2C_ADDR = addr
     }
 }

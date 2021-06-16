@@ -15,7 +15,7 @@ namespace VL53L0X {
      * @param dat is the data will be write, eg: 0x05
      */
     //% blockId="writeReg" block="write registor address %addr|byte %dat"
-    //% advance=true
+    //% advanced=true
     export function writeReg(addr: number, dat: number): void {
         let buf = pins.createBuffer(2);
         buf[0] = addr;

@@ -3,12 +3,11 @@
     "description": "",
     "dependencies": {
         "core": "*",
-        "radio": "*",
         "microphone": "*"
     },
     "files": [
-        "main.ts",
-        "README.md"
+        "README.md",
+        "vl53l0x.ts"
     ],
     "testFiles": [
         "test.ts"

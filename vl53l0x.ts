@@ -13,6 +13,132 @@ namespace VL53L0X {
     let did_timeout:boolean;
     let timeout_start_ms:number;
     let io_timeout:number=0;
+
+    // Start continuous ranging measurements. If period_ms (optional) is 0 or not
+    // given, continuous back-to-back mode is used (the sensor takes measurements as
+    // often as possible); otherwise, continuous timed mode is used, with the given
+    // inter-measurement period in milliseconds determining how often the sensor
+    // takes a measurement.
+    // based on VL53L0X_StartMeasurement()
+    /**
+     * based on VL53L0X_StartMeasurement
+     * @param period_ms interval, eg: 30
+     */
+    //% blockId="startContinuous" block="StartMeasurement VL53L0X"
+    export function startContinuous(period_ms:number)
+    {
+    writeReg(0x80, 0x01);
+    writeReg(0xFF, 0x01);
+    writeReg(0x00, 0x00);
+    writeReg(0x91, stop_variable);
+    writeReg(0x00, 0x01);
+    writeReg(0xFF, 0x00);
+    writeReg(0x80, 0x00);
+
+    if (period_ms != 0)
+    {
+        // continuous timed mode
+
+        // VL53L0X_SetInterMeasurementPeriodMilliSeconds() begin
+
+        let osc_calibrate_val = readReg16(regAddr.OSC_CALIBRATE_VAL);
+
+        if (osc_calibrate_val != 0)
+        {
+        period_ms *= osc_calibrate_val;
+        }
+
+        writeReg32(regAddr.SYSTEM_INTERMEASUREMENT_PERIOD, period_ms);
+
+        // VL53L0X_SetInterMeasurementPeriodMilliSeconds() end
+
+        writeReg(regAddr.SYSRANGE_START, 0x04); // VL53L0X_REG_SYSRANGE_MODE_TIMED
+    }
+    else
+    {
+        // continuous back-to-back mode
+        writeReg(regAddr.SYSRANGE_START, 0x02); // VL53L0X_REG_SYSRANGE_MODE_BACKTOBACK
+    }
+    }
+
+    // Stop continuous measurements
+    // based on VL53L0X_StopMeasurement()
+    /**
+     * based on VL53L0X_StartMeasurement
+     */
+    //% blockId="stopContinuous" block="StopMeasurement VL53L0X"
+    export function stopContinuous()
+    {
+    writeReg(regAddr.SYSRANGE_START, 0x01); // VL53L0X_REG_SYSRANGE_MODE_SINGLESHOT
+
+    writeReg(0xFF, 0x01);
+    writeReg(0x00, 0x00);
+    writeReg(0x91, 0x00);
+    writeReg(0x00, 0x01);
+    writeReg(0xFF, 0x00);
+    }
+
+    // Returns a range reading in millimeters when continuous mode is active
+    // (readRangeSingleMillimeters() also calls this function after starting a
+    // single-shot range measurement)
+    /**
+     * based on VL53L0X_StartMeasurement
+     */
+    //% blockId="readRangeContinuousMillimeters" block="readRangeContinuousMillimeters"
+    export function readRangeContinuousMillimeters():number
+    {
+    startTimeout();
+    while ((readReg(regAddr.RESULT_INTERRUPT_STATUS) & 0x07) == 0)
+    {
+        if (checkTimeoutExpired())
+        {
+        did_timeout = true;
+        return 65535;
+        }
+    }
+
+    // assumptions: Linearity Corrective Gain is 1000 (default);
+    // fractional ranging is not enabled
+    let range = readReg16(regAddr.RESULT_RANGE_STATUS + 10);
+
+    writeReg(regAddr.SYSTEM_INTERRUPT_CLEAR, 0x01);
+
+    return range;
+    }
+
+    // Performs a single-shot range measurement and returns the reading in
+    // millimeters
+    // based on VL53L0X_PerformSingleRangingMeasurement()
+    /**
+     * based on VL53L0X_StartMeasurement
+     */
+    //% blockId="readRangeSingleMillimeters" block="readRangeSingleMillimeters"
+    export function readRangeSingleMillimeters():number
+    {
+    writeReg(0x80, 0x01);
+    writeReg(0xFF, 0x01);
+    writeReg(0x00, 0x00);
+    writeReg(0x91, stop_variable);
+    writeReg(0x00, 0x01);
+    writeReg(0xFF, 0x00);
+    writeReg(0x80, 0x00);
+
+    writeReg(regAddr.SYSRANGE_START, 0x01);
+
+    // "Wait until start bit has been cleared"
+    startTimeout();
+    while (readReg(regAddr.SYSRANGE_START) & 0x01)
+    {
+        if (checkTimeoutExpired())
+        {
+        did_timeout = true;
+        return 65535;
+        }
+    }
+
+    return readRangeContinuousMillimeters();
+    }
+
     /**
      * initialize VL53L0X
      * @param io_2v8 running volutage at 2v8, eg: true
@@ -603,114 +729,6 @@ export function getVcselPulsePeriod(type:vcselPeriodType):number
     return decodeVcselPeriod(readReg(regAddr.FINAL_RANGE_CONFIG_VCSEL_PERIOD));
   }
   else { return 255; }
-}
-
-// Start continuous ranging measurements. If period_ms (optional) is 0 or not
-// given, continuous back-to-back mode is used (the sensor takes measurements as
-// often as possible); otherwise, continuous timed mode is used, with the given
-// inter-measurement period in milliseconds determining how often the sensor
-// takes a measurement.
-// based on VL53L0X_StartMeasurement()
-export function startContinuous(period_ms:number)
-{
-  writeReg(0x80, 0x01);
-  writeReg(0xFF, 0x01);
-  writeReg(0x00, 0x00);
-  writeReg(0x91, stop_variable);
-  writeReg(0x00, 0x01);
-  writeReg(0xFF, 0x00);
-  writeReg(0x80, 0x00);
-
-  if (period_ms != 0)
-  {
-    // continuous timed mode
-
-    // VL53L0X_SetInterMeasurementPeriodMilliSeconds() begin
-
-    let osc_calibrate_val = readReg16(regAddr.OSC_CALIBRATE_VAL);
-
-    if (osc_calibrate_val != 0)
-    {
-      period_ms *= osc_calibrate_val;
-    }
-
-    writeReg32(regAddr.SYSTEM_INTERMEASUREMENT_PERIOD, period_ms);
-
-    // VL53L0X_SetInterMeasurementPeriodMilliSeconds() end
-
-    writeReg(regAddr.SYSRANGE_START, 0x04); // VL53L0X_REG_SYSRANGE_MODE_TIMED
-  }
-  else
-  {
-    // continuous back-to-back mode
-    writeReg(regAddr.SYSRANGE_START, 0x02); // VL53L0X_REG_SYSRANGE_MODE_BACKTOBACK
-  }
-}
-
-// Stop continuous measurements
-// based on VL53L0X_StopMeasurement()
-export function stopContinuous()
-{
-  writeReg(regAddr.SYSRANGE_START, 0x01); // VL53L0X_REG_SYSRANGE_MODE_SINGLESHOT
-
-  writeReg(0xFF, 0x01);
-  writeReg(0x00, 0x00);
-  writeReg(0x91, 0x00);
-  writeReg(0x00, 0x01);
-  writeReg(0xFF, 0x00);
-}
-
-// Returns a range reading in millimeters when continuous mode is active
-// (readRangeSingleMillimeters() also calls this function after starting a
-// single-shot range measurement)
-export function readRangeContinuousMillimeters():number
-{
-  startTimeout();
-  while ((readReg(regAddr.RESULT_INTERRUPT_STATUS) & 0x07) == 0)
-  {
-    if (checkTimeoutExpired())
-    {
-      did_timeout = true;
-      return 65535;
-    }
-  }
-
-  // assumptions: Linearity Corrective Gain is 1000 (default);
-  // fractional ranging is not enabled
-  let range = readReg16(regAddr.RESULT_RANGE_STATUS + 10);
-
-  writeReg(regAddr.SYSTEM_INTERRUPT_CLEAR, 0x01);
-
-  return range;
-}
-
-// Performs a single-shot range measurement and returns the reading in
-// millimeters
-// based on VL53L0X_PerformSingleRangingMeasurement()
-export function readRangeSingleMillimeters():number
-{
-  writeReg(0x80, 0x01);
-  writeReg(0xFF, 0x01);
-  writeReg(0x00, 0x00);
-  writeReg(0x91, stop_variable);
-  writeReg(0x00, 0x01);
-  writeReg(0xFF, 0x00);
-  writeReg(0x80, 0x00);
-
-  writeReg(regAddr.SYSRANGE_START, 0x01);
-
-  // "Wait until start bit has been cleared"
-  startTimeout();
-  while (readReg(regAddr.SYSRANGE_START) & 0x01)
-  {
-    if (checkTimeoutExpired())
-    {
-      did_timeout = true;
-      return 65535;
-    }
-  }
-
-  return readRangeContinuousMillimeters();
 }
 
 // Did a timeout occur in one of the read functions since the last call to

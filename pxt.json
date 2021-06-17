@@ -7,7 +7,8 @@
     },
     "files": [
         "README.md",
-        "vl53l0x.ts"
+        "vl53l0x.ts",
+        "enum.ts"
     ],
     "testFiles": [
         "test.ts"

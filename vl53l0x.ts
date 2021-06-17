@@ -22,9 +22,9 @@ namespace VL53L0X {
     // based on VL53L0X_StartMeasurement()
     /**
      * based on VL53L0X_StartMeasurement
-     * @param period_ms interval, eg: 30
+     * @param period_ms interval, eg: 0
      */
-    //% blockId="startContinuous" block="StartMeasurement VL53L0X"
+    //% blockId="startContinuous" block="StartMeasurement VL53L0X interval%period_ms"
     export function startContinuous(period_ms:number)
     {
     writeReg(0x80, 0x01);
@@ -165,6 +165,7 @@ namespace VL53L0X {
         writeReg(0xFF, 0x01);
         writeReg(0x00, 0x00);
         stop_variable = readReg(0x91);
+
         writeReg(0x00, 0x01);
         writeReg(0xFF, 0x00);
         writeReg(0x80, 0x00);

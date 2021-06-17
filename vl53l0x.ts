@@ -15,9 +15,9 @@ namespace VL53L0X {
     let io_timeout:number=0;
     /**
      * initialize VL53L0X
+     * @param io_2v8 running volutage at 2v8, eg: true
      */
-    //% blockId="writeReg" block="write registor address %addr|byte %dat"
-    //% advanced=true
+    //% blockId="initialize" block="initialize VL53L0X at 2V8 %volts"
     export function initialize(io_2v8:boolean): boolean {
 
         // check model ID register (value specified in datasheet)

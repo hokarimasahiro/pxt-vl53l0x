@@ -160,12 +160,10 @@ namespace VL53L0X {
 
         // "Set I2C standard mode"
         writeReg(0x88, 0x00);
-
         writeReg(0x80, 0x01);
         writeReg(0xFF, 0x01);
         writeReg(0x00, 0x00);
         stop_variable = readReg(0x91);
-
         writeReg(0x00, 0x01);
         writeReg(0xFF, 0x00);
         writeReg(0x80, 0x00);
@@ -182,7 +180,7 @@ namespace VL53L0X {
 
         // VL53L0X_StaticInit() begin
 
-        let spad_count;
+        let spad_count:number;
         let spad_type_is_aperture:boolean;
         if (!getSpadInfo(spad_count, spad_type_is_aperture)) { return false; }
 
@@ -919,8 +917,8 @@ export function performSingleRefCalibration(vhv_init_byte:number):boolean
     //% advanced=true
     export function writeReg(addr: number, dat: number): void {
         let buf = pins.createBuffer(2);
-        buf[0] = addr;
-        buf[1] = dat;
+        buf[0] = addr >> 0;
+        buf[1] = dat >> 0;
         pins.i2cWriteBuffer(I2C_ADDR, buf)
     }
 
@@ -931,7 +929,7 @@ export function performSingleRefCalibration(vhv_init_byte:number):boolean
     //% blockId="ReadReg" block="read data from registor address %addr"
     //% advanced=true
     export function readReg(addr: number): number {
-        pins.i2cWriteNumber(I2C_ADDR, addr, NumberFormat.UInt8BE);
+        pins.i2cWriteNumber(I2C_ADDR, addr >> 0, NumberFormat.UInt8BE);
         return pins.i2cReadNumber(I2C_ADDR, NumberFormat.UInt8BE);
     }
 
@@ -944,8 +942,8 @@ export function performSingleRefCalibration(vhv_init_byte:number):boolean
     //% advanced=true
     export function writeReg16(addr: number, dat: number): void {
         let buf = pins.createBuffer(3);
-        buf[0] = addr;
-        buf[1] = dat & 0xff;
+        buf[0] = addr >> 0;
+        buf[1] = dat >> 0;
         buf[2] = dat >> 8;
         pins.i2cWriteBuffer(I2C_ADDR, buf)
     }
@@ -957,7 +955,7 @@ export function performSingleRefCalibration(vhv_init_byte:number):boolean
     //% blockId="ReadReg16" block="read word from registor address %addr"
     //% advanced=true
     export function readReg16(addr: number): number {
-        pins.i2cWriteNumber(I2C_ADDR, addr, NumberFormat.UInt8BE);
+        pins.i2cWriteNumber(I2C_ADDR, addr >> 0, NumberFormat.UInt8BE);
         return pins.i2cReadNumber(I2C_ADDR, NumberFormat.UInt16BE);
     }
 
@@ -971,7 +969,7 @@ export function performSingleRefCalibration(vhv_init_byte:number):boolean
     export function writeReg32(addr: number, dat: number): void {
         let buf = pins.createBuffer(5);
         buf[0] = addr;
-        buf[1] = dat & 0xff;
+        buf[1] = dat >> 0;
         buf[2] = dat >> 8;
         buf[3] = dat >> 16;
         buf[4] = dat >> 24;
@@ -985,7 +983,7 @@ export function performSingleRefCalibration(vhv_init_byte:number):boolean
     //% blockId="ReadReg32" block="read dword from registor address %addr"
     //% advanced=true
     export function readReg32(addr: number): number {
-        pins.i2cWriteNumber(I2C_ADDR, addr, NumberFormat.UInt8BE);
+        pins.i2cWriteNumber(I2C_ADDR, addr >> 0, NumberFormat.UInt8BE);
         return pins.i2cReadNumber(I2C_ADDR, NumberFormat.Int32BE);
     }
 
@@ -997,11 +995,10 @@ export function performSingleRefCalibration(vhv_init_byte:number):boolean
     //% blockId="WriteBuf" block="registor address %addr|write buf %dat"
     //% advanced=true
     export function writeBuf(addr: number, dat: number[]): void {
-        let buf = pins.createBuffer(dat.length + 2);
-        buf[0] = addr >> 8;
-        buf[1] = addr;
+        let buf = pins.createBuffer(dat.length + 1);
+        buf[0] = addr >> 0;
         for(let i=0;i<dat.length;i++){
-            buf[i + 2] = dat[i] & 0xff;
+            buf[i + 1] = dat[i] & 0xff;
         }
         pins.i2cWriteBuffer(I2C_ADDR, buf)
     }
@@ -1016,7 +1013,7 @@ export function performSingleRefCalibration(vhv_init_byte:number):boolean
     export function readBuf(addr: number, size: number): number[] {
         let retbuf:number[]=[];
 
-        pins.i2cWriteNumber(I2C_ADDR, addr, NumberFormat.UInt16BE);
+        pins.i2cWriteNumber(I2C_ADDR, addr >> 0, NumberFormat.UInt16BE);
         let buf = pins.i2cReadBuffer(I2C_ADDR, size);
         for(let i=0;i<size;i++){
             retbuf.push(buf[i]);
@@ -1031,8 +1028,8 @@ export function performSingleRefCalibration(vhv_init_byte:number):boolean
     //% blockId="setI2cAddress" block="i2c address set to %addr"
     //% advanced=true
     export function setI2cAddress(addr: number): void {
-        writeReg(regAddr.I2C_SLAVE_DEVICE_ADDRESS, addr & 0x7F);
-        I2C_ADDR = addr
+        writeReg(regAddr.I2C_SLAVE_DEVICE_ADDRESS, (addr >> 0)& 0x7F);
+        I2C_ADDR = addr >> 0;
     }
     // Record the current time to check an upcoming timeout against
     function startTimeout() {

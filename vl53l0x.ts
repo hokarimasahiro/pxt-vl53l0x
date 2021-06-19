@@ -182,7 +182,7 @@ namespace VL53L0X {
 
         let spad_count:number;
         let spad_type_is_aperture:boolean;
-        let param:number[]:=[0,0];
+        let param:number[]=[0,0];
 
 //        if (!getSpadInfo(spad_count, spad_type_is_aperture)) { return false; }
         if (!getSpadInfo(param)) { return false; }
@@ -777,7 +777,7 @@ function getSpadInfo(param:number[]):boolean
 //  count = tmp & 0x7f;
 //  type_is_aperture = (((tmp >> 7) & 0x01) == 0) ? false:true;
   param[0] = tmp & 0x7f;
-  param[1] = (((tmp >> 7) & 0x01) == 0);
+  param[1] = (tmp >> 7) & 0x01;
 
   writeReg(0x81, 0x00);
   writeReg(0xFF, 0x06);

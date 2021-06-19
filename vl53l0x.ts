@@ -182,7 +182,12 @@ namespace VL53L0X {
 
         let spad_count:number;
         let spad_type_is_aperture:boolean;
-        if (!getSpadInfo(spad_count, spad_type_is_aperture)) { return false; }
+        let param:number[]:=[0,0];
+
+//        if (!getSpadInfo(spad_count, spad_type_is_aperture)) { return false; }
+        if (!getSpadInfo(param)) { return false; }
+        spad_count = param[0];
+        spad_type_is_aperture = param[1] == 0 ? false:true;
 
         // The SPAD map (RefGoodSpadMap) is read by VL53L0X_get_info_from_device() in
         // the API, but the same data seems to be more easily readable from
@@ -372,7 +377,7 @@ namespace VL53L0X {
 // seems to increase the likelihood of getting an inaccurate reading because of
 // unwanted reflections from objects other than the intended target.
 // Defaults to 0.25 MCPS as initialized by the ST API and this library.
-export function setSignalRateLimit(limit_Mcps:number):boolean
+function setSignalRateLimit(limit_Mcps:number):boolean
 {
   if (limit_Mcps < 0 || limit_Mcps > 511.99) { return false; }
 
@@ -382,7 +387,7 @@ export function setSignalRateLimit(limit_Mcps:number):boolean
 }
 
 // Get the return signal rate limit check value in MCPS
-export function getSignalRateLimit():number
+function getSignalRateLimit():number
 {
   return readReg16(regAddr.FINAL_RANGE_CONFIG_MIN_COUNT_RATE_RTN_LIMIT) / (1 << 7);
 }
@@ -394,7 +399,7 @@ export function getSignalRateLimit():number
 // factor of N decreases the range measurement standard deviation by a factor of
 // sqrt(N). Defaults to about 33 milliseconds; the minimum is 20 ms.
 // based on VL53L0X_set_measurement_timing_budget_micro_seconds()
-export function setMeasurementTimingBudget(budget_us:number):boolean
+function setMeasurementTimingBudget(budget_us:number):boolean
 {
   let enables:boolean[]; //0:tcc, 1:msrc, 2:dss, 3:pre_range, 4:final_range
   let timeouts:number[];    // 0:pre_range_vcsel_period_pclks, 1:final_range_vcsel_period_pclks,
@@ -484,7 +489,7 @@ export function setMeasurementTimingBudget(budget_us:number):boolean
 // Get the measurement timing budget in microseconds
 // based on VL53L0X_get_measurement_timing_budget_micro_seconds()
 // in us
-export function getMeasurementTimingBudget():number
+function getMeasurementTimingBudget():number
 {
   let enables:boolean[]; //0:tcc, 1:msrc, 2:dss, 3:pre_range, 4:final_range
   let timeouts:number[];    // 0:pre_range_vcsel_period_pclks, 1:final_range_vcsel_period_pclks,
@@ -539,7 +544,7 @@ export function getMeasurementTimingBudget():number
 //  pre:  12 to 18 (initialized default: 14)
 //  final: 8 to 14 (initialized default: 10)
 // based on VL53L0X_set_vcsel_pulse_period()
-export function setVcselPulsePeriod(type:vcselPeriodType, period_pclks:number):boolean
+function setVcselPulsePeriod(type:vcselPeriodType, period_pclks:number):boolean
 {
   let vcsel_period_reg = encodeVcselPeriod(period_pclks);
 
@@ -717,7 +722,7 @@ export function setVcselPulsePeriod(type:vcselPeriodType, period_pclks:number):b
 
 // Get the VCSEL pulse period in PCLKs for the given period type.
 // based on VL53L0X_get_vcsel_pulse_period()
-export function getVcselPulsePeriod(type:vcselPeriodType):number
+function getVcselPulsePeriod(type:vcselPeriodType):number
 {
   if (type == vcselPeriodType.VcselPeriodPreRange)
   {
@@ -732,7 +737,7 @@ export function getVcselPulsePeriod(type:vcselPeriodType):number
 
 // Did a timeout occur in one of the read functions since the last call to
 // timeoutOccurred()?
-export function timeoutOccurred():boolean
+function timeoutOccurred():boolean
 {
   let tmp = did_timeout;
   did_timeout = false;
@@ -744,7 +749,7 @@ export function timeoutOccurred():boolean
 // Get reference SPAD (single photon avalanche diode) count and type
 // based on VL53L0X_get_info_from_device(),
 // but only gets reference SPAD count and type
-export function getSpadInfo(count:number, type_is_aperture:boolean):boolean
+function getSpadInfo(param:number[]):boolean
 {
   let tmp;
 
@@ -769,8 +774,10 @@ export function getSpadInfo(count:number, type_is_aperture:boolean):boolean
   writeReg(0x83, 0x01);
   tmp = readReg(0x92);
 
-  count = tmp & 0x7f;
-  type_is_aperture = (((tmp >> 7) & 0x01) == 0) ? false:true;
+//  count = tmp & 0x7f;
+//  type_is_aperture = (((tmp >> 7) & 0x01) == 0) ? false:true;
+  param[0] = tmp & 0x7f;
+  param[1] = (((tmp >> 7) & 0x01) == 0);
 
   writeReg(0x81, 0x00);
   writeReg(0xFF, 0x06);
@@ -786,7 +793,7 @@ export function getSpadInfo(count:number, type_is_aperture:boolean):boolean
 
 // Get sequence step enables
 // based on VL53L0X_GetSequenceStepEnables()
-export function getSequenceStepEnables():boolean[]
+function getSequenceStepEnables():boolean[]
 {
   let sequence_config = readReg(regAddr.SYSTEM_SEQUENCE_CONFIG);
   return[   ((sequence_config >> 4) & 0x1) == 0 ? false:true,
@@ -811,7 +818,7 @@ export function getSequenceStepEnables():boolean[]
         pre_range_us=6,
         final_range_us=7
     }*/
-export function getSequenceStepTimeouts(enables:boolean[]):number[]
+function getSequenceStepTimeouts(enables:boolean[]):number[]
 {
     let pre_range_vcsel_period_pclks = getVcselPulsePeriod(vcselPeriodType.VcselPeriodPreRange);
     let final_range_vcsel_period_pclks = getVcselPulsePeriod(vcselPeriodType.VcselPeriodFinalRange);
@@ -840,7 +847,7 @@ export function getSequenceStepTimeouts(enables:boolean[]):number[]
 // based on VL53L0X_decode_timeout()
 // Note: the original function returned a uint32_t, but the return value is
 // always stored in a uint16_t.
-export function decodeTimeout(reg_val:number):number
+function decodeTimeout(reg_val:number):number
 {
   // format: "(LSByte * 2^MSByte) + 1"
   return ((reg_val & 0x00FF) <<
@@ -849,7 +856,7 @@ export function decodeTimeout(reg_val:number):number
 
 // Encode sequence step timeout register value from timeout in MCLKs
 // based on VL53L0X_encode_timeout()
-export function encodeTimeout(timeout_mclks:number):number
+function encodeTimeout(timeout_mclks:number):number
 {
   // format: "(LSByte * 2^MSByte) + 1"
 
@@ -873,7 +880,7 @@ export function encodeTimeout(timeout_mclks:number):number
 
 // Convert sequence step timeout from MCLKs to microseconds with given VCSEL period in PCLKs
 // based on VL53L0X_calc_timeout_us()
-export function timeoutMclksToMicroseconds(timeout_period_mclks:number, vcsel_period_pclks:number):number
+function timeoutMclksToMicroseconds(timeout_period_mclks:number, vcsel_period_pclks:number):number
 {
   let macro_period_ns = calcMacroPeriod(vcsel_period_pclks);
 
@@ -882,7 +889,7 @@ export function timeoutMclksToMicroseconds(timeout_period_mclks:number, vcsel_pe
 
 // Convert sequence step timeout from microseconds to MCLKs with given VCSEL period in PCLKs
 // based on VL53L0X_calc_timeout_mclks()
-export function timeoutMicrosecondsToMclks(timeout_period_us:number, vcsel_period_pclks:number):number
+function timeoutMicrosecondsToMclks(timeout_period_us:number, vcsel_period_pclks:number):number
 {
   let macro_period_ns = calcMacroPeriod(vcsel_period_pclks);
 
@@ -891,7 +898,7 @@ export function timeoutMicrosecondsToMclks(timeout_period_us:number, vcsel_perio
 
 
 // based on VL53L0X_perform_single_ref_calibration()
-export function performSingleRefCalibration(vhv_init_byte:number):boolean
+function performSingleRefCalibration(vhv_init_byte:number):boolean
 {
   writeReg(regAddr.SYSRANGE_START, 0x01 | vhv_init_byte); // VL53L0X_REG_SYSRANGE_MODE_START_STOP
 

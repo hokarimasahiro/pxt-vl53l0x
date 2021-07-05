@@ -1,10 +1,18 @@
+serial.redirectToUSB()
+serial.setBaudRate(BaudRate.BaudRate115200)
 basic.showIcon(IconNames.Heart)
-if (VL53L0X.initialize(true)){
+serial.writeLine("Ready!!")
+if (VL53L0X.initialize(true)) {
+    serial.writeLine("initialize OK")
     basic.showIcon(IconNames.Happy)
-}else{
-    basic.showIcon(IconNames.Sad)
+    VL53L0X.startContinuous(0)
+} else {
+    serial.writeLine("initialize NG")
+    basic.showIcon(IconNames.Confused)
 }
 basic.forever(function () {
-    basic.showNumber(VL53L0X.readRangeSingleMillimeters())
-    basic.pause(1000)
+    led.toggle(0, 0)
+    serial.writeLine("" + (VL53L0X.readRangeContinuousMillimeters()))
+    watchfont.showSorobanNumber(VL53L0X.readRangeContinuousMillimeters(), 1, 4)
+    basic.pause(100)
 })

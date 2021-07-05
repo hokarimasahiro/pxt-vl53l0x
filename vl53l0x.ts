@@ -188,7 +188,7 @@ namespace VL53L0X {
         if (!getSpadInfo(param)) { return false; }
         spad_count = param[0];
         spad_type_is_aperture = param[1] == 0 ? false:true;
-
+serial.writeLine("spad_cont=" + spad_count + " spad_type_is_aperture=" + spad_type_is_aperture)
         // The SPAD map (RefGoodSpadMap) is read by VL53L0X_get_info_from_device() in
         // the API, but the same data seems to be more easily readable from
         // GLOBAL_CONFIG_SPAD_ENABLES_REF_0 through _6, so read it from there
@@ -222,7 +222,8 @@ namespace VL53L0X {
         writeBuf(regAddr.GLOBAL_CONFIG_SPAD_ENABLES_REF_0, ref_spad_map);
 
         // -- VL53L0X_set_reference_spads() end
-
+serial.writeLine("set_reference_spads end")
+serial.writeLine("RESULT_INTERRUPT_STATUS=" + readReg(0x13));
         // -- VL53L0X_load_tuning_settings() begin
         // DefaultTuningSettings from vl53l0x_tuning.h
 
@@ -321,7 +322,7 @@ namespace VL53L0X {
         writeReg(0x80, 0x00);
 
         // -- VL53L0X_load_tuning_settings() end
-
+serial.writeLine("load_tuning_settings end")
         // "Set interrupt config to new sample ready"
         // -- VL53L0X_SetGpioConfig() begin
 
@@ -332,6 +333,7 @@ namespace VL53L0X {
         // -- VL53L0X_SetGpioConfig() end
 
         measurement_timing_budget_us = getMeasurementTimingBudget();
+serial.writeLine("measurement_timing_budget_us=" + measurement_timing_budget_us)
 
         // "Disable MSRC and TCC by default"
         // MSRC = Minimum Signal Rate Check
@@ -346,22 +348,29 @@ namespace VL53L0X {
         setMeasurementTimingBudget(measurement_timing_budget_us);
 
         // VL53L0X_StaticInit() end
+serial.writeLine("StaticInit end " + measurement_timing_budget_us)
 
         // VL53L0X_PerformRefCalibration() begin (VL53L0X_perform_ref_calibration())
 
         // -- VL53L0X_perform_vhv_calibration() begin
+serial.writeLine("SYSTEM_INTERRUPT_CONFIG_GPIO=" + readReg(0x0A));
+serial.writeLine("RESULT_INTERRUPT_STATUS=" + readReg(0x13));
 
         writeReg(regAddr.SYSTEM_SEQUENCE_CONFIG, 0x01);
         if (!performSingleRefCalibration(0x40)) { return false; }
 
         // -- VL53L0X_perform_vhv_calibration() end
+serial.writeLine("perform_vhv_calibration end")
 
         // -- VL53L0X_perform_phase_calibration() begin
+serial.writeLine("SYSTEM_INTERRUPT_CONFIG_GPIO=" + readReg(0x0A));
+serial.writeLine("RESULT_INTERRUPT_STATUS=" + readReg(0x13));
 
         writeReg(regAddr.SYSTEM_SEQUENCE_CONFIG, 0x02);
         if (!performSingleRefCalibration(0x00)) { return false; }
 
         // -- VL53L0X_perform_phase_calibration() end
+serial.writeLine("perform_phase_calibration end")
 
         // "restore the previous Sequence Config"
         writeReg(regAddr.SYSTEM_SEQUENCE_CONFIG, 0xE8);
@@ -481,7 +490,7 @@ function setMeasurementTimingBudget(budget_us:number):boolean
 
     // set_sequence_step_timeout() end
 
-    measurement_timing_budget_us = budget_us; // store for internal reuse
+    measurement_timing_budget_us = budget_us >> 0; // store for internal reuse
   }
   return true;
 }
@@ -534,7 +543,7 @@ function getMeasurementTimingBudget():number
   }
 
   measurement_timing_budget_us = budget_us; // store for internal reuse
-  return budget_us;
+  return budget_us >> 0;
 }
 
 // Set the VCSEL (vertical cavity surface emitting laser) pulse period for the
@@ -1005,7 +1014,7 @@ function performSingleRefCalibration(vhv_init_byte:number):boolean
         let buf = pins.createBuffer(dat.length + 1);
         buf[0] = addr >> 0;
         for(let i=0;i<dat.length;i++){
-            buf[i + 1] = dat[i] & 0xff;
+            buf[i + 1] = dat[i] >> 0;
         }
         pins.i2cWriteBuffer(I2C_ADDR, buf)
     }
@@ -1020,8 +1029,8 @@ function performSingleRefCalibration(vhv_init_byte:number):boolean
     export function readBuf(addr: number, size: number): number[] {
         let retbuf:number[]=[];
 
-        pins.i2cWriteNumber(I2C_ADDR, addr >> 0, NumberFormat.UInt16BE);
-        let buf = pins.i2cReadBuffer(I2C_ADDR, size);
+        pins.i2cWriteNumber(I2C_ADDR, addr >> 0, NumberFormat.UInt8BE);
+        let buf = pins.i2cReadBuffer(I2C_ADDR, size >> 0);
         for(let i=0;i<size;i++){
             retbuf.push(buf[i]);
         }

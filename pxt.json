@@ -3,7 +3,8 @@
     "description": "",
     "dependencies": {
         "core": "*",
-        "microphone": "*"
+        "microphone": "*",
+        "pxt-watchfont": "github:hokarimasahiro/pxt-watchfont#2b458eef5787353c9592abaf3f176105f102b51b"
     },
     "files": [
         "README.md",

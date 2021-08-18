@@ -984,7 +984,7 @@ function performSingleRefCalibration(vhv_init_byte:number):boolean
     //% advanced=true
     export function writeReg32(addr: number, dat: number): void {
         let buf = pins.createBuffer(5);
-        buf[0] = addr;
+        buf[0] = addr >> 0;
         buf[1] = dat >> 0;
         buf[2] = dat >> 8;
         buf[3] = dat >> 16;

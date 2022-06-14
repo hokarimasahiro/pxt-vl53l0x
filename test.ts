@@ -12,7 +12,8 @@ if (VL53L0X.initialize(true)) {
 }
 basic.forever(function () {
     led.toggle(0, 0)
-    serial.writeLine("" + (VL53L0X.readRangeContinuousMillimeters()))
-    watchfont.showSorobanNumber(VL53L0X.readRangeContinuousMillimeters(), 1, 4)
+    let dis = VL53L0X.readRangeContinuousMillimeters();
+    serial.writeLine("" + dis)
+    watchfont.showSorobanNumber(dis, 1, 4)
     basic.pause(100)
 })
